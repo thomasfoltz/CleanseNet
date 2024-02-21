@@ -41,7 +41,7 @@ class Decoder(nn.Module):
         x = self.conv(x)
         return x
 
-class UNET(nn.Module):
+class CondUNET(nn.Module):
     def __init__(self, input_channels=1, cond_channels=10):
         super().__init__()
         self.e1 = Encoder(input_channels + cond_channels, 64)
@@ -72,7 +72,7 @@ class UNET(nn.Module):
         outputs = self.outputs(d4)
         return outputs
 
-class Discriminator(nn.Module):
+class CondDiscriminator(nn.Module):
     def __init__(self):
         super(Discriminator, self).__init__()
         self.model = nn.Sequential(
