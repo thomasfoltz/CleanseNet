@@ -71,10 +71,10 @@ class CondUNET(nn.Module):
 
         outputs = self.outputs(d4)
         return outputs
-
+    
 class CondDiscriminator(nn.Module):
     def __init__(self):
-        super(Discriminator, self).__init__()
+        super(CondDiscriminator, self).__init__()
         self.model = nn.Sequential(
             nn.Conv2d(1, 64, kernel_size=3, stride=2, padding=1),
             nn.LeakyReLU(0.2, inplace=True),
