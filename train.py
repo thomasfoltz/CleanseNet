@@ -1,20 +1,24 @@
+import argparse
 import torch
 import torchvision
 import torch.nn as nn
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 from models import Generator, Discriminator
-from pertubation import fgsm_attack, PurturbedDataset
+from perturbation import fgsm_attack, PurturbedDataset
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='training script for CleanseNet')
+    parser.add_argument('-e', '--epochs', type=int, default=10, help='Epochs to train GAN')
+    args = parser.parse_args()
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-    trainset = datasets.CIFAR10(root='./data', train=True, download=False, transform=transform)
-    testset = datasets.CIFAR10(root='./data', train=False, download=False, transform=transform)
+    trainset = datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
 
-    purturbed_trainset = PurturbedDataset(trainset, fgsm_attack, device)
-    dataloader = torch.utils.data.DataLoader(purturbed_trainset, batch_size=32, shuffle=True)
+    perturbed_testset = PurturbedDataset(trainset, fgsm_attack, device)
+    dataloader = torch.utils.data.DataLoader(perturbed_testset, batch_size=32, shuffle=True)
 
     generator = Generator().to(device)
     discriminator = Discriminator().to(device)
@@ -23,8 +27,7 @@ if __name__ == "__main__":
     optimizer_G = torch.optim.Adam(generator.parameters())
     optimizer_D = torch.optim.Adam(discriminator.parameters())
 
-    epochs = 10
-    for epoch in range(epochs):
+    for epoch in range(args.epochs):
         for i, (purturbed_imgs, real_imgs, _) in enumerate(dataloader):
             print(f"Epoch: {epoch}, Batch: {i}")
             real_images = real_imgs.to(device)
@@ -37,19 +40,19 @@ if __name__ == "__main__":
 
             # Train the Discriminator
             optimizer_D.zero_grad()
+            real_outputs = discriminator(real_images)
             # print(real_images.size())
-            outputs = discriminator(real_images)
-            # print(outputs.size(), real_labels.size())
-            real_loss = criterion(outputs, real_labels)
-            real_score = outputs
+            # print(real_outputs.size(), real_labels.size())
+            real_loss = criterion(real_outputs, real_labels)
+            real_score = real_outputs
 
             # Generate fake images
             fake_images = generator(purturbed_images)
+            fake_outputs = discriminator(fake_images.detach())
             # print(fake_images.size())
-            outputs = discriminator(fake_images.detach())
-            # print(outputs.size(), fake_labels.size())
-            fake_loss = criterion(outputs, fake_labels)
-            fake_score = outputs
+            # print(fake_outputs.size(), fake_labels.size())
+            fake_loss = criterion(fake_outputs, fake_labels)
+            fake_score = fake_outputs
 
             # Backprop and optimize
             d_loss = real_loss + fake_loss
@@ -59,18 +62,17 @@ if __name__ == "__main__":
             # Train the Generator
             optimizer_G.zero_grad()
             fake_images = generator(purturbed_images)
-            outputs = discriminator(fake_images)
+            trained_outputs = discriminator(fake_images)
 
             # Measure generator's ability to fool the discriminator
-            g_loss = criterion(outputs, real_labels)
+            g_loss = criterion(trained_outputs, real_labels)
 
             # Backprop and optimize
             g_loss.backward()
             optimizer_G.step()
 
-
-    torch.save(generator.state_dict(), 'generator_model.pth')
-    torch.save(discriminator.state_dict(), 'discriminator_model.pth')
+    torch.save(generator.state_dict(), 'generator.pth')
+    torch.save(discriminator.state_dict(), 'discriminator.pth')
 
     # torchvision.utils.save_image(trainset[1][0], 'image_original.png')
-    # torchvision.utils.save_image(purturbed_trainset[1][0], 'image_purturbed.png')
+    # torchvision.utils.save_image(perturbed_testset[1][0], 'image_purturbed.png')

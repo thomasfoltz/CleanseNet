@@ -1,6 +1,14 @@
 import torch
 import torch.nn as nn
 
+def load_model(model_path, Model, device):
+    model = Model
+    model.to(device) 
+    state_dict = torch.load(model_path, map_location=torch.device(device))
+    model.load_state_dict(state_dict)
+    model.eval()
+    return model
+
 class Generator(nn.Module):
     def __init__(self):
         super(Generator, self).__init__()
