@@ -5,7 +5,7 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 
 from perturbation import fgsm_attack, PurturbedDataset
-from models import load_model, Generator, Discriminator
+from models import load_model, Discriminator, UNet
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='test script for CleanseNet')
@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
     perturbed_testset = PurturbedDataset(testset, fgsm_attack, device)
 
-    generator = load_model('generator.pth', Generator(), device)
+    generator = load_model('generator.pth', UNet(), device)
     discriminator = load_model('discriminator.pth', Discriminator(), device)
 
     dataloader = torch.utils.data.DataLoader(perturbed_testset, batch_size=32)
@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
         print(torch.median(predetermined_labels), torch.median(determined_labels))
 
-        torchvision.utils.save_image(original[3], 'test_original.png')
-        torchvision.utils.save_image(perturbed[3], 'test_perturbed.png')
-        torchvision.utils.save_image(cleaned[3], 'test_cleaned.png')
+        torchvision.utils.save_image(original[5], 'test_original.png')
+        torchvision.utils.save_image(perturbed[5], 'test_perturbed.png')
+        torchvision.utils.save_image(cleaned[5], 'test_cleaned.png')
         break
