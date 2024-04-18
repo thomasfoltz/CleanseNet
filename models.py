@@ -19,10 +19,10 @@ class Generator(nn.Module):
             nn.ConvTranspose2d(256, 128, 3, 1, 1, bias=False),
             nn.BatchNorm2d(128),
             nn.ReLU(True),
-            nn.ConvTranspose2d(128, 64, 3, 1, 1, bias=False),
+            nn.ConvTranspose2d(128, 64, 1, 1, 1, bias=False),
             nn.BatchNorm2d(64),
             nn.ReLU(True),
-            nn.ConvTranspose2d(64, 3, 3, 1, 1, bias=False),
+            nn.ConvTranspose2d(64, 3, 2, 1, 1, bias=False),
             nn.Tanh()
         )
 
