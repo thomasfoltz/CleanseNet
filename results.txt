@@ -1,0 +1,15 @@
+0.5 strength pertubation
+original accuracy: 10.1%
+perturbed accuracy: 9.86%
+cleaned accuracy: 9.9%
+
+0.3 strength pertubation
+original accuracy: 10.11%
+perturbed accuracy: 9.73%
+cleaned accuracy: 10.09%
+
+0.1 strength pertubation
+original accuracy: 10.24%
+perturbed accuracy: 9.55%
+cleaned accuracy: 10.51%
+

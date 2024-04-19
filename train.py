@@ -17,15 +17,14 @@ if __name__ == "__main__":
 
     trainset = datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
 
-    perturbed_testset = PurturbedDataset(trainset, fgsm_attack, device)
-    dataloader = torch.utils.data.DataLoader(perturbed_testset, batch_size=64, shuffle=True)
-
     generator = UNet().to(device)
     discriminator = Discriminator().to(device)
 
+    perturbed_testset = PurturbedDataset(trainset, fgsm_attack, device)
+    dataloader = torch.utils.data.DataLoader(perturbed_testset, batch_size=64, shuffle=True)
+
     alpha = 0.1
-    adversarial_loss = nn.BCELoss()
-    l1_loss = nn.L1Loss()
+    adversarial_loss, l1_loss = nn.BCELoss(), nn.L1Loss()
     optimizer_G = torch.optim.Adam(generator.parameters(), lr=0.001)
     optimizer_D = torch.optim.Adam(discriminator.parameters(), lr=0.001)
 
